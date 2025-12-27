@@ -1,0 +1,29 @@
+
+
+$Hostname = $env:COMPUTERNAME
+$OS = (Get-CimInstance Win32_OperatingSystem).Caption
+$FechaHora = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+$paths = @(
+ "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+ "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+)
+
+$Software = Get-ItemProperty $paths |
+Select DisplayName, DisplayVersion, Publisher, InstallDate |
+Where-Object { $_.DisplayName } |
+Sort DisplayName
+
+$Header = @"
+<h1>Reporte de Software Instalado</h1>
+<p><b>Hostname:</b> $Hostname</p>
+<p><b>Sistema Operativo:</b> $OS</p>
+<p><b>Fecha y Hora:</b> $FechaHora</p>
+<hr>
+"@
+
+$Software |
+ConvertTo-Html -PreContent $Header -Title "Inventario de Software" |
+Out-File "C:\Temp\Software_Instalado.html" -Encoding UTF8
+
+
